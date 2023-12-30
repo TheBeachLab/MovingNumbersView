@@ -227,46 +227,45 @@ private extension MovingNumbersView {
         elementBuilder("-")
     }
     
-    /// A vertical stack of 0 -> 9.
+    /// A vertical stack of 9, 0 -> 9, 0 for infinite scrolling.
     struct TenDigitStack: View {
-        let spacing: CGFloat
+        var spacing: CGFloat? = nil
         let elementBuilder: ElementBuilder
 
         var body: some View {
             VStack(alignment: .center, spacing: spacing) {
-                ForEach((0...9).reversed(), id: \.self) { digit in
-                    self.elementBuilder("\(digit)")
+                // Top duplicate for the infinite effect
+                self.elementBuilder("9")
+
+                // Original 0-9 stack
+                ForEach((0...9).reversed(), id: \.self) { iDigit in
+                    self.elementBuilder("\(iDigit)")
                 }
+
+                // Bottom duplicate for the infinite effect
+                self.elementBuilder("0")
             }
+            .padding(.vertical, spacing) // Padding to maintain consistent spacing
         }
     }
 
-    /// Make the digit stack moves up and down if the diffNumber changes.
+    /// Updated geometry effect for vertical infinite scrolling.
     struct VerticalShift: GeometryEffect {
         var diffNumber: CGFloat // 0 to 9 only
         let digitSpacing: CGFloat
         var shouldResetInstantly: Bool = false
 
         var animatableData: CGFloat {
-            get { shouldResetInstantly ? 0 : diffNumber }
+            get { diffNumber }
             set { diffNumber = newValue }
         }
 
         func effectValue(size: CGSize) -> ProjectionTransform {
-            // The 0.5 is to center right at a single number.
-            // i.e. for 10 digits the center is between some two numbers.
-            let translationY = -size.height/2 + (size.height / 10) * (diffNumber + 0.5)
-            return .init(.init(
-                translationX: 0,
-                y: translationY
-            ))
-        }
-
-        init(diffNumber: CGFloat, digitSpacing: CGFloat) {
-            self.diffNumber = diffNumber
-            self.digitSpacing = digitSpacing
-            // Detect wraparound and set shouldResetInstantly accordingly.
-            self.shouldResetInstantly = (diffNumber == 0.0 || diffNumber == 9.0)
+            // Calculate the height of one digit stack based on total height divided by number of digits plus duplicates.
+            let singleDigitHeight = (size.height / 11) // 9 digits plus two duplicates
+            // Adjust the translation to center the stack on the correct digit.
+            let translationY = -size.height/2 + singleDigitHeight * (diffNumber + 1) + (digitSpacing ?? 0) * CGFloat(diffNumber + 1)
+            return .init(.init(translationX: 0, y: translationY))
         }
     }
 
