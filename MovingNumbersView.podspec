@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
 A number label with moving digit effect.
                        DESC
  
-  s.homepage         = 'https://github.com/aunnnn/MovingNumbersView'
+  s.homepage         = 'https://github.com/thebeachlab/MovingNumbersView'
   s.license          = 'MIT'
   s.author           = { 'Wirawit Rueopas' => 'aun.wirawit@gmail.com' }
   s.source           = { :git => 'https://github.com/thebeachlab/MovingNumbersView.git', :tag => s.version.to_s }
