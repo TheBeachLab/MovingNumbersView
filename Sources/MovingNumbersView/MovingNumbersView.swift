@@ -227,22 +227,20 @@ private extension MovingNumbersView {
         elementBuilder("-")
     }
     
-    /// A vertical stack of 9 -> 0.
+    /// A vertical stack of 0 -> 9.
     struct TenDigitStack: View {
-        var spacing: CGFloat? = nil
+        let spacing: CGFloat
         let elementBuilder: ElementBuilder
+
         var body: some View {
             VStack(alignment: .center, spacing: spacing) {
-                ForEach((0...9).reversed(), id: \.self) { iDigit in
-                    self.elementBuilder("\(iDigit)")
+                ForEach((0...9).reversed(), id: \.self) { digit in
+                    self.elementBuilder("\(digit)")
                 }
             }
-            .padding(.bottom, spacing)
-            // Padding so the bottom most digit (0)
-            // has the padding like others.
         }
     }
-    
+
     /// Make the digit stack moves up and down if the diffNumber changes.
     struct VerticalShift: GeometryEffect {
         var diffNumber: CGFloat // 0 to 9 only
@@ -255,21 +253,13 @@ private extension MovingNumbersView {
         }
 
         func effectValue(size: CGSize) -> ProjectionTransform {
-            if shouldResetInstantly {
-                let instantTranslationY: CGFloat
-                if diffNumber == 9 {
-                    // For 9 to 0, instantly move to the start (top) without animation
-                    instantTranslationY = -size.height/2 + digitSpacing/2
-                } else {
-                    // For 0 to 9, instantly move to the end (bottom) without animation
-                    instantTranslationY = size.height/2 - (size.height / 10) - digitSpacing/2
-                }
-                return .init(.init(translationX: 0, y: instantTranslationY))
-            } else {
-                // Normal animated transition
-                let translationY = -size.height/2 + (size.height / 10) * (diffNumber + 0.5) + digitSpacing/2
-                return .init(.init(translationX: 0, y: translationY))
-            }
+            // The 0.5 is to center right at a single number.
+            // i.e. for 10 digits the center is between some two numbers.
+            let translationY = -size.height/2 + (size.height / 10) * (diffNumber + 0.5)
+            return .init(.init(
+                translationX: 0,
+                y: translationY
+            ))
         }
 
         init(diffNumber: CGFloat, digitSpacing: CGFloat) {
