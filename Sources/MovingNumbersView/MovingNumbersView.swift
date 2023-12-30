@@ -204,7 +204,7 @@ private extension MovingNumbersView {
             .drawingGroup()
             .modifier(VerticalShift(
                 diffNumber: CGFloat(digit),
-                digitSpacing: verticalDigitSpacing, shouldAnimate: shouldAnimate))
+                digitSpacing: verticalDigitSpacing))
             .animation(shouldAnimate ? digitStackAnimation : transitionWithoutAnimation)
         return ds
     }
@@ -247,27 +247,39 @@ private extension MovingNumbersView {
     struct VerticalShift: GeometryEffect {
         var diffNumber: CGFloat // 0 to 9 only
         let digitSpacing: CGFloat
-        var shouldAnimate: Bool = true
-        
+        var shouldResetInstantly: Bool = false
+
         var animatableData: CGFloat {
-            get { diffNumber }
+            get { shouldResetInstantly ? 0 : diffNumber }
             set { diffNumber = newValue }
         }
-        
+
         func effectValue(size: CGSize) -> ProjectionTransform {
-        // The following logic will instantly reset the position of the digit
-        // when it wraps around from 9 to 0 or from 0 to 9 without animation.
-        if shouldAnimate {
-            let translationY = -size.height/2 + (size.height / 10) * (diffNumber + 0.5) + digitSpacing/2
-            return .init(.init(translationX: 0, y: translationY))
-        } else {
-            // Instantly reset to start or end depending on going up or down
-            let instantTranslationY = (diffNumber == 9) ? -size.height/2 + digitSpacing/2 : -size.height/2 + (size.height / 10) * 9.5 + digitSpacing/2
-            return .init(.init(translationX: 0, y: instantTranslationY))
+            if shouldResetInstantly {
+                let instantTranslationY: CGFloat
+                if diffNumber == 9 {
+                    // For 9 to 0, instantly move to the start (top) without animation
+                    instantTranslationY = -size.height/2 + digitSpacing/2
+                } else {
+                    // For 0 to 9, instantly move to the end (bottom) without animation
+                    instantTranslationY = size.height/2 - (size.height / 10) - digitSpacing/2
+                }
+                return .init(.init(translationX: 0, y: instantTranslationY))
+            } else {
+                // Normal animated transition
+                let translationY = -size.height/2 + (size.height / 10) * (diffNumber + 0.5) + digitSpacing/2
+                return .init(.init(translationX: 0, y: translationY))
             }
         }
+
+        init(diffNumber: CGFloat, digitSpacing: CGFloat) {
+            self.diffNumber = diffNumber
+            self.digitSpacing = digitSpacing
+            // Detect wraparound and set shouldResetInstantly accordingly.
+            self.shouldResetInstantly = (diffNumber == 0.0 || diffNumber == 9.0)
+        }
     }
-    
+
     /// Get visual elements for the whole number part
     /// i.e. 1234 -> 1,234
     func getWholeVisualElements(whole: Int) -> [VisualElementType] {
