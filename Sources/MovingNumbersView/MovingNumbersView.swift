@@ -177,12 +177,12 @@ private extension MovingNumbersView {
         }
     }
     
-    func viewFromElement(_ element: VisualElementType) -> some View {
+    func viewFromElement(_ element: VisualElementType, shouldAnimate: Bool = true) -> some View {
         switch element {
         case let .digit(value, _):
-            return AnyView(self.buildDigitStack(showingDigit: value))
+            return AnyView(self.buildDigitStack(showingDigit: value, shouldAnimate: shouldAnimate))
         case let .decimalDigit(value, _):
-            return AnyView(self.buildDigitStack(showingDigit: value))
+            return AnyView(self.buildDigitStack(showingDigit: value, shouldAnimate: shouldAnimate))
         case .dot:
             return AnyView(self.buildDot())
         case .comma:
@@ -204,8 +204,7 @@ private extension MovingNumbersView {
             .drawingGroup()
             .modifier(VerticalShift(
                 diffNumber: CGFloat(digit),
-                shouldAnimate: shouldAnimate,
-                digitSpacing: verticalDigitSpacing))
+                digitSpacing: verticalDigitSpacing, shouldAnimate: shouldAnimate))
             .animation(shouldAnimate ? digitStackAnimation : transitionWithoutAnimation)
         return ds
     }
