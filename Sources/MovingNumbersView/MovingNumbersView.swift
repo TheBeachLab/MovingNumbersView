@@ -191,16 +191,22 @@ private extension MovingNumbersView {
             return AnyView(self.buildMinus())
         }
     }
+
+    private var transitionWithoutAnimation: Animation {
+    Animation.linear(duration: 0).speed(9999)
+    }
     
-    func buildDigitStack(showingDigit digit: Int) -> some View {
+    func buildDigitStack(showingDigit digit: Int, shouldAnimate: Bool) -> some View {
         let digit = CGFloat(digit)
         let ds = TenDigitStack(
             spacing: verticalDigitSpacing,
             elementBuilder: elementBuilder)
             .drawingGroup()
             .modifier(VerticalShift(
-                diffNumber: digit,
+                diffNumber: CGFloat(digit),
+                shouldAnimate: shouldAnimate,
                 digitSpacing: verticalDigitSpacing))
+            .animation(shouldAnimate ? digitStackAnimation : transitionWithoutAnimation)
         return ds
     }
     
@@ -242,6 +248,7 @@ private extension MovingNumbersView {
     struct VerticalShift: GeometryEffect {
         var diffNumber: CGFloat // 0 to 9 only
         let digitSpacing: CGFloat
+        var shouldAnimate: Bool = true
         
         var animatableData: CGFloat {
             get { diffNumber }
@@ -249,13 +256,16 @@ private extension MovingNumbersView {
         }
         
         func effectValue(size: CGSize) -> ProjectionTransform {
-            // The 0.5 is to center right at a single number.
-            // i.e. for 10 digits the center is between some two numbers.
+        // The following logic will instantly reset the position of the digit
+        // when it wraps around from 9 to 0 or from 0 to 9 without animation.
+        if shouldAnimate {
             let translationY = -size.height/2 + (size.height / 10) * (diffNumber + 0.5) + digitSpacing/2
-            return .init(.init(
-                translationX: 0,
-                y: translationY
-            ))
+            return .init(.init(translationX: 0, y: translationY))
+        } else {
+            // Instantly reset to start or end depending on going up or down
+            let instantTranslationY = (diffNumber == 9) ? -size.height/2 + digitSpacing/2 : -size.height/2 + (size.height / 10) * 9.5 + digitSpacing/2
+            return .init(.init(translationX: 0, y: instantTranslationY))
+            }
         }
     }
     
