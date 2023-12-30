@@ -14,7 +14,7 @@ A number label with moving digit effect.
   s.homepage         = 'https://github.com/aunnnn/MovingNumbersView'
   s.license          = 'MIT'
   s.author           = { 'Wirawit Rueopas' => 'aun.wirawit@gmail.com' }
-  s.source           = { :git => 'https://github.com/aunnnn/MovingNumbersView.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://github.com/thebeachlab/MovingNumbersView.git', :tag => s.version.to_s }
  
   s.source_files     = 'Sources/MovingNumbersView/*.swift'
   s.swift_version    = '5.0'
