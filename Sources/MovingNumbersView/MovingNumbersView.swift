@@ -204,12 +204,18 @@ private extension MovingNumbersView {
         return ds
     }
     
-    func buildComma() -> some View {
-        elementBuilder(",")
+        func buildComma() -> some View {
+        // Replace the hardcoded comma with the current locale's grouping separator
+        let locale = Locale.current
+        let groupingSeparator = locale.groupingSeparator ?? ","
+        return elementBuilder(groupingSeparator)
     }
     
     func buildDot() -> some View {
-        elementBuilder(".")
+        // Replace the hardcoded dot with the current locale's decimal separator
+        let locale = Locale.current
+        let decimalSeparator = locale.decimalSeparator ?? "."
+        return elementBuilder(decimalSeparator)
     }
     
     func buildMinus() -> some View {
