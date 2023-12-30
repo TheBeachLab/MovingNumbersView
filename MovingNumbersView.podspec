@@ -3,7 +3,7 @@ Pod::Spec.new do |s|
   s.platforms = { :ios => '13.0', :osx => '10.15' }
 
   s.name             = 'MovingNumbersView'
-  s.version          = '0.1.0'
+  s.version          = '0.1.1'
   s.summary          = 'A number label with moving digit effect'
   s.requires_arc     = true
  
